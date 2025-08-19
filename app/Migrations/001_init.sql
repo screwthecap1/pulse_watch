@@ -1,0 +1,42 @@
+CREATE TABLE IF NOT EXISTS migrations(
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    filename VARCHAR(190) NOT NULL UNIQUE,
+    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS users (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(190) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    role ENUM('admin', 'user') NOT NULL DEFAULT 'user',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS monitors (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    name VARCHAR(120) NOT NULL,
+    type ENUM('HTTP', 'PING', 'TCP') NOT NULL,
+    target VARCHAR(255) NOT NULL,
+    interval_sec INT NOT NULL DEFAULT 60,
+    timeout_ms INT NOT NULL DEFAULT 5000,
+    expect_status SMALLINT NULL,
+    expect_keyword VARCHAR(120) NULL,
+    sla_target DECIMAL(5, 2) DEFAULT 99.0,
+    is_active TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_user (user_id),
+    CONSTRAINT fk_mon_user FOREIGN KEY (user_id) REFERENCES users(id)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS checks (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    monitor_id BIGINT UNSIGNED NOT NULL,
+    ts TIMESTAMP NOT NULL,
+    success TINYINT(1) NOT NULL,
+    status_code INT NULL,
+    latency_ms INT NULL,
+    error TEXT NULL,
+    INDEX idx_monitor_ts (monitor_id, ts),
+    CONSTRAINT fk_chk_mon FOREIGN KEY (monitor_id) REFERENCES monitors(id)
+) ENGINE=InnoDB;
