@@ -1,5 +1,5 @@
-/vendor
-/.idea
-/.osp
+/vendor/
+/.idea/
+/.osp/
 .env
-composer.lock
+*.log
