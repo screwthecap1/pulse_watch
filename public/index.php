@@ -47,5 +47,6 @@ $router->get('/logout', [$auth, 'logout']);
 $monik = new MonitorController();
 $router->get('/monitors/new', [$monik, 'createForm']);
 $router->post('/monitors', [$monik, 'store']);
+$router->get('/monitors', [$monik, 'index']);
 
 $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);

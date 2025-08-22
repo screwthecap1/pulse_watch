@@ -71,4 +71,28 @@ final class MonitorController
         header('Location: /');
         exit;
     }
+
+    public function index(): void
+    {
+        $uid = $this->requireAuth();
+        if (!$uid) return;
+        $rows = MonitorRepository::allWithLastStatus($uid);
+
+        echo '<h2>Мои мониторы</h2>';
+        echo '<p><a href="/monitors/new">Создать монитор</a></p>';
+        echo '<table border="1" cellpadding="6" cellspacing="0">';
+        echo '<tr><th>Название</th><th>Тип</th><th>Цель</th><th>Статус</th><th>RT</th><th>HTTP</th><th>Проверен</th></tr>';
+        foreach ($rows as $r) {
+            echo '<tr>';
+            echo '<td>' . htmlspecialchars($r['name']) . '</td>';
+            echo '<td>' . htmlspecialchars($r['type']) . '</td>';
+            echo '<td>' . htmlspecialchars($r['target']) . '</td>';
+            echo '<td>' . htmlspecialchars($r['last_status'] ?? '-') . '</td>';
+            echo '<td>' . htmlspecialchars((string)($r['last_rt'] ?? '-')) . '</td>';
+            echo '<td>' . htmlspecialchars((string)($r['last_http'] ?? '-')) . '</td>';
+            echo '<td>' . htmlspecialchars((string)($r['last_checked'] ?? '-')) . '</td>';
+            echo '</tr>';
+        }
+        echo '</table>';
+    }
 }
