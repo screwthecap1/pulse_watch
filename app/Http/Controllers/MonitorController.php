@@ -23,7 +23,7 @@ final class MonitorController
         if (!$this->requireAuth()) return;
         $csrf = Session::csrf();
         echo <<<HTML
-             <h2>Новый монитор</h2>
+             <h2>New monitor</h2>
              <form action="/monitors" method="post">
                <input type="hidden" name="_csrf" value="$csrf">
                <label>Name: <input name="name" required></label><br>
