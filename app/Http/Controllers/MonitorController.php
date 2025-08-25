@@ -55,4 +55,21 @@ final class MonitorController
         $rows = MonitorRepository::allWithLastStatus($uid);
         View::render('monitors/index', ['rows' => $rows]);
     }
+
+    public function show(int $id): void
+    {
+        $uid = $this->requireAuth();
+        if (!$uid) return;
+
+        $monitor = MonitorRepository::findOwned($uid, $id);
+        if (!$monitor) { http_response_code(404); echo "Not found"; return; }
+
+        $uptime = MonitorRepository::uptimePercent($uid, $id);
+        \App\Support\View::render('monitors/show', [
+            'monitor' => $monitor,
+            'uptime'  => $uptime,
+        ]);
+    }
 }
+
+

@@ -38,4 +38,49 @@ final class MonitorRepository
             ", [$userId]
         )->fetchAll();
     }
+
+    public static function findOwned(int $userId, int $monitorId): ?array
+    {
+        $row = DB::run('SELECT * FROM monitors WHERE id=? and user_id=?', [$monitorId, $userId])->fetch();
+        return $row ?: null;
+    }
+
+    public static function results(
+        int $userId,
+        int $monitorId,
+        int $limit = 200,
+        int $sinceMinutes = null
+    ): array {
+        $params = [$monitorId];
+        $where = 'monitor_id = ?';
+        if ($sinceMinutes !== null) {
+            $where .= 'AND checked_at >= (NOW() - INTERVAL ? MINUTE)';
+            $params[] = $sinceMinutes;
+        }
+        $sql = "SELECT checked_at, status, response_time_ms, http_code, message
+        FROM monitor_results
+        WHERE {$where}
+        ORDER BY checked_at DESC
+        LIMIT " . max(1, $limit);
+
+        $owned = DB::run(
+            'SELECT 1 FROM monitors WHERE id=? AND user_id=?',
+            [$monitorId, $userId]
+        )->fetchColumn();
+        if (!$owned) return [];
+
+        return DB::run($sql, $params)->fetchAll();
+    }
+
+    public static function uptimePercent(int $userId, int $monitorId, int $sinceMinutes = 1440): float
+    {
+        $rows = self::results($userId, $monitorId, 10000, $sinceMinutes);
+        if (!$rows) return 0.0;
+
+        $ok = 0;
+        foreach ($rows as $r) {
+            if (($r['status'] ?? '') === 'OK') $ok++;
+        }
+        return round($ok / count($rows) * 100, 2);
+    }
 }

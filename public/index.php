@@ -9,6 +9,7 @@ use App\Support\DB;
 use App\Support\Session;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MonitorController;
+use App\Http\Controllers\ApiController;
 
 Env::load(__DIR__ . '/../.env');
 Session::start();
@@ -50,3 +51,6 @@ $router->post('/monitors', [$monik, 'store']);
 $router->get('/monitors', [$monik, 'index']);
 
 $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
+
+$api = new ApiController();
+$router->get('api/monitor/results', [$api, 'monitorResults']);

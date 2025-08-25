@@ -19,6 +19,7 @@
             <td><?= htmlspecialchars((string)($r['last_rt'] ?? '-')) ?></td>
             <td><?= htmlspecialchars((string)($r['last_http'] ?? '-')) ?></td>
             <td><?= htmlspecialchars((string)($r['last_checked'] ?? '-')) ?></td>
+            <td><a href="/monitors/<?= $r['id'] ?>"><?= htmlspecialchars($r['name']) ?></a></td>
         </tr>
     <?php endforeach; ?>
 </table>
