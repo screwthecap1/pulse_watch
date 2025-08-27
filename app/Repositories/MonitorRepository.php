@@ -49,7 +49,7 @@ final class MonitorRepository
         int $userId,
         int $monitorId,
         int $limit = 200,
-        int $sinceMinutes = null
+        ?int $sinceMinutes = null
     ): array {
         $params = [$monitorId];
         $where = 'monitor_id = ?';
@@ -82,5 +82,35 @@ final class MonitorRepository
             if (($r['status'] ?? '') === 'OK') $ok++;
         }
         return round($ok / count($rows) * 100, 2);
+    }
+
+    public static function deleteOwned(int $userId, int $monitorId): bool
+    {
+        $r = DB::run("DELETE FROM monitors WHERE id=? and user_id=?", [$monitorId, $userId]);
+        return $r->rowCount() > 0;
+    }
+
+    public static function updateOwned(int $userId, int $monitorId, array $fields): bool
+    {
+        if (!$fields) return false;
+        $cols = [];
+        $vals = [];
+        foreach ($fields as $k => $v) {
+            $cols[] = "{$k} = ?";
+            $vals[] = $v;
+        }
+        $vals[] = $monitorId;
+        $vals[] = $userId;
+        $sql = 'UPDATE monitors SET '.implode(', ', $cols).' WHERE id=? AND user_id=?';
+        $r = DB::run($sql, $vals);
+        return $r->rowCount() > 0;
+    }
+
+    public static function toggleActive(int $userId, int $monitorId): bool
+    {
+        $row = self::findOwned($userId, $monitorId);
+        if (!$row) return false;
+        $new = (int)!((int)$row['is_active']);
+        return self::updateOwned($userId, $monitorId, ['is_active' => $new]);
     }
 }

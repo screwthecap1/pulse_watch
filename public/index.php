@@ -49,8 +49,13 @@ $monik = new MonitorController();
 $router->get('/monitors/new', [$monik, 'createForm']);
 $router->post('/monitors', [$monik, 'store']);
 $router->get('/monitors', [$monik, 'index']);
-
-$router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
+$router->get('/monitors/{id}/edit', [$monik, 'editForm']);
+$router->post('/monitors/{id}', [$monik, 'update']);
+$router->post('/monitors/{id}/del', [$monik, 'destroy']);
+$router->post('/monitors/{id}/toggle', [$monik, 'toggle']);
+$router->get('/monitors/{id}', [$monik, 'show']);
 
 $api = new ApiController();
-$router->get('api/monitor/results', [$api, 'monitorResults']);
+$router->get('/api/monitor/results', [$api, 'monitorResults']);
+
+$router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
